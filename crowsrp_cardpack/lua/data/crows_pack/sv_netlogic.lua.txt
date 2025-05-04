@@ -1,0 +1,9 @@
+util.AddNetworkString("CrowsPack_OpenMainGUI")
+
+hook.Add("PlayerSay", "CrowsPack_ChatCommand", function(ply, text)
+    if string.lower(text) == "!unboxcards" then
+        net.Start("CrowsPack_OpenMainGUI")
+        net.Send(ply)
+        return ""
+    end
+end)

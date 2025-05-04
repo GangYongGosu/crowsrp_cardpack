@@ -1,0 +1,16 @@
+net.Receive("CROWS_TCG_XP_Update", function()
+    LocalPlayer().CROWS_XP = net.ReadInt(32)
+    LocalPlayer().CROWS_Level = net.ReadInt(16)
+end)
+
+hook.Add("HUDPaint", "CROWS_TCG_XPBar", function()
+    local lvl = LocalPlayer().CROWS_Level or 1
+    local xp = LocalPlayer().CROWS_XP or 0
+    local max = 100 + (lvl ^ 1.5) * 50
+
+    local w, h = 250, 18
+    local x, y = 20, ScrH() - 60
+    draw.RoundedBox(6, x, y, w, h, Color(25, 25, 25, 180))
+    draw.RoundedBox(6, x, y, w * (xp / max), h, Color(100, 200, 50, 200))
+    draw.SimpleText("Level " .. lvl .. " (" .. xp .. "/" .. math.floor(max) .. ")", "DermaDefault", x + 5, y + 2, color_white, 0, 0)
+end)

@@ -1,0 +1,43 @@
+hook.Add("PlayerSpawn", "CrowsPack_ApplyCardStats", function(ply)
+    if not IsValid(ply) or not ply.EquippedCard then return end
+
+    local card = ply.EquippedCard
+    ply:SetArmor((ply:GetArmor() or 0) + (card.armor or 0))
+    ply:SetHealth(math.min(100 + (card.healthBoost or 0), ply:GetMaxHealth() or 100))
+
+    -- Optional passive effects could go here
+end)
+
+hook.Add("PlayerDeath", "CrowsPack_ReduceDurability", function(victim)
+    if not victim.EquippedCard then return end
+    local card = victim.EquippedCard
+    card.durability = card.durability - 1
+    if card.durability <= 0 then
+        victim.EquippedCard = nil
+        DarkRP.notify(victim, 1, 5, "[Crows RP] Your card broke due to 0 durability.")
+    end
+end)
+
+hook.Add("PlayerSpawn", "CROWS_TCG_ApplyCardEffects", function(ply)
+    timer.Simple(1, function()
+        if not IsValid(ply) then return end
+
+        local equipped = ply.EquippedCards or {}
+        local totalArmor = 0
+        local totalHealth = 0
+        local totalSpeed = 1.0
+
+        for _, card in ipairs(equipped) do
+            local stats = card.stats or {}
+            totalArmor = totalArmor + (stats.Armor or 0)
+            totalHealth = totalHealth + (stats.Health or 0)
+            totalSpeed = totalSpeed + ((stats.SpeedBoost or 0) / 100)
+        end
+
+        ply:SetArmor(math.Clamp(totalArmor, 0, 200))
+        ply:SetHealth(100 + math.Clamp(totalHealth, 0, 200))
+        ply:SetMaxHealth(100 + math.Clamp(totalHealth, 0, 200))
+        ply:SetWalkSpeed(200 * totalSpeed)
+        ply:SetRunSpeed(400 * totalSpeed)
+    end)
+end)

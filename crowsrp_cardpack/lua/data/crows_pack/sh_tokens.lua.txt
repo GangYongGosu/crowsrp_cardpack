@@ -1,0 +1,35 @@
+CROWS_TCG = CROWS_TCG or {}
+
+util.AddNetworkString("CROWS_TCG_TokenUpdate")
+util.AddNetworkString("CROWS_TCG_RequestTokenData")
+
+-- Setup default token tracking
+hook.Add("PlayerInitialSpawn", "CROWS_TCG_LoadTokens", function(ply)
+    ply:SetNWInt("GoblinTokens", 0)
+end)
+
+-- Send token data to player
+net.Receive("CROWS_TCG_RequestTokenData", function(_, ply)
+    net.Start("CROWS_TCG_TokenUpdate")
+        net.WriteInt(ply:GetNWInt("GoblinTokens", 0), 32)
+    net.Send(ply)
+end)
+
+function CROWS_TCG_AddTokens(ply, amt)
+    local tokens = ply:GetNWInt("GoblinTokens", 0)
+    ply:SetNWInt("GoblinTokens", tokens + amt)
+
+    net.Start("CROWS_TCG_TokenUpdate")
+        net.WriteInt(tokens + amt, 32)
+    net.Send(ply)
+end
+
+function CROWS_TCG_RemoveTokens(ply, amt)
+    local tokens = ply:GetNWInt("GoblinTokens", 0)
+    local newAmt = math.max(tokens - amt, 0)
+    ply:SetNWInt("GoblinTokens", newAmt)
+
+    net.Start("CROWS_TCG_TokenUpdate")
+        net.WriteInt(newAmt, 32)
+    net.Send(ply)
+end

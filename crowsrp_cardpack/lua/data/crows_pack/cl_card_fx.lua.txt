@@ -1,0 +1,14 @@
+local fxColors = {
+    ["Uncommon"] = Color(150, 150, 255),
+    ["Rare"] = Color(255, 180, 100),
+    ["Epic"] = Color(180, 100, 255),
+    ["Legendary"] = Color(255, 215, 0),
+    ["Mythical"] = Color(255, 0, 255),
+    ["Ancient"] = Color(200, 20, 20)
+}
+
+function CROWS_TCG_DrawCardAura(x, y, w, h, rarity)
+    local col = fxColors[rarity] or color_white
+    surface.SetDrawColor(col.r, col.g, col.b, 80 + math.sin(CurTime() * 2) * 50)
+    surface.DrawOutlinedRect(x - 4, y - 4, w + 8, h + 8)
+end

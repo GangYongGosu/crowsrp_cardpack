@@ -1,0 +1,24 @@
+util.AddNetworkString("CrowsPack_RequestAdmin")
+util.AddNetworkString("CrowsPack_OpenAdminPanel")
+util.AddNetworkString("CrowsPack_AdminSetChance")
+
+local packSettings = {
+    mythicalDropChance = 0.001
+}
+
+net.Receive("CrowsPack_RequestAdmin", function(len, ply)
+    if not ply:IsAdmin() then return end
+    net.Start("CrowsPack_OpenAdminPanel")
+    net.Send(ply)
+end)
+
+net.Receive("CrowsPack_AdminSetChance", function(len, ply)
+    if not ply:IsAdmin() then return end
+    local newChance = net.ReadFloat()
+    packSettings.mythicalDropChance = math.Clamp(newChance, 0, 1)
+    print("[Crows RP] Mythical drop chance set to: " .. newChance)
+end)
+
+function CrowsPack_GetDropChance()
+    return packSettings.mythicalDropChance
+end

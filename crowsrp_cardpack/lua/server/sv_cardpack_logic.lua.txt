@@ -1,0 +1,58 @@
+CrowsPack = CrowsPack or {}
+CrowsPack.PlayerPity = CrowsPack.PlayerPity or {}
+
+-- Rarity drop chances (editable later via GUI in Phase 3)
+CrowsPack.RarityChances = {
+    ["Uncommon"] = 60,
+    ["Rare"] = 25,
+    ["Epic"] = 10,
+    ["Legendary"] = 4,
+    ["Mythical"] = 0.9,
+    ["Ancient"] = 0.1,
+}
+
+-- Pity tracker
+function CrowsPack:GetPityCount(ply)
+    return CrowsPack.PlayerPity[ply:SteamID()] or 0
+end
+
+function CrowsPack:IncrementPity(ply)
+    local current = CrowsPack:GetPityCount(ply)
+    CrowsPack.PlayerPity[ply:SteamID()] = current + 1
+end
+
+function CrowsPack:ResetPity(ply)
+    CrowsPack.PlayerPity[ply:SteamID()] = 0
+end
+
+-- Random rarity selection
+function CrowsPack:RollRarity()
+    local roll = math.Rand(0, 100)
+    local acc = 0
+    for rarity, chance in pairs(CrowsPack.RarityChances) do
+        acc = acc + chance
+        if roll <= acc then return rarity end
+    end
+    return "Uncommon"
+end
+
+-- Stat generator with ranks
+function CrowsPack:GenerateCardStats()
+    local stats = {}
+
+    for stat, range in pairs(CrowsPack.Config.DefaultStatRange) do
+        local val = math.random(range.min, range.max)
+        local rank = "F"
+
+        for r, bounds in pairs(CrowsPack.Config.StatRanks) do
+            if val >= bounds.min and val <= bounds.max then
+                rank = r
+                break
+            end
+        end
+
+        stats[stat] = { value = val, rank = rank }
+    end
+
+    return stats
+end

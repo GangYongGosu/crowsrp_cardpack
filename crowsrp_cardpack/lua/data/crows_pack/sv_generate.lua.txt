@@ -1,0 +1,90 @@
+util.AddNetworkString("CrowsPack_OpenedPack")
+
+local function GetRandomRarity()
+    local totalWeight = 0
+    for _, info in pairs(CrowsPack.Rarities) do
+        totalWeight = totalWeight + info.weight
+    end
+
+    local rand = math.Rand(0, totalWeight)
+    local accum = 0
+
+    for rarity, info in pairs(CrowsPack.Rarities) do
+        accum = accum + info.weight
+        if rand <= accum then return rarity end
+    end
+
+    return "Uncommon"
+end
+
+local function GenerateCard()
+    local rarity = GetRandomRarity()
+    local durabilityRange = CrowsPack.RankDurability["F"]
+    
+    for rank, range in pairs(CrowsPack.RankDurability) do
+        if rarity == "Ancient" and rank == "X" then durabilityRange = range break end
+        if rarity == "Legendary" and rank == "S" then durabilityRange = range break end
+        if rarity == "Mythical" and rank == "X" then durabilityRange = range break end
+        if rarity == "Epic" and rank == "A" then durabilityRange = range break end
+        if rarity == "Rare" and rank == "B" then durabilityRange = range break end
+        if rarity == "Uncommon" and rank == "C" then durabilityRange = range break end
+    end
+
+    local durability = math.random(durabilityRange.min, durabilityRange.max)
+
+    local card = {
+        rarity = rarity,
+        durability = durability,
+        weight = math.random(5, 20),
+        armor = math.random(0, 25),
+        health = math.random(0, 100),
+        damageBoost = math.random(0, 10),
+        accuracy = math.random(0, 15),
+        fireRate = math.random(0, 15),
+        passive = "", -- Placeholder for future passives
+    }
+
+    return card
+end
+
+function CrowsPack:OpenPack(ply)
+    if not IsValid(ply) then return end
+    local result = {}
+    for i = 1, 10 do
+        local card = GenerateCard()
+        table.insert(CrowsPack.PlayerInventories[ply], card)
+        table.insert(result, card)
+    end
+    self:SaveInventory(ply)
+
+    net.Start("CrowsPack_OpenedPack")
+    net.WriteTable(result)
+    net.Send(ply)
+end
+
+function CrowsPack:TradeUp(ply, rarity)
+    if not IsValid(ply) then return end
+    local inv = CrowsPack.PlayerInventories[ply]
+    local count = 0
+    for _, card in ipairs(inv) do
+        if card.rarity == rarity then count = count + 1 end
+    end
+
+    if count < 10 then return false end
+
+    -- Remove 10 cards
+    local removed = 0
+    for i = #inv, 1, -1 do
+        if inv[i].rarity == rarity then
+            table.remove(inv, i)
+            removed = removed + 1
+            if removed >= 10 then break end
+        end
+    end
+
+    -- Add upgraded card
+    local newCard = GenerateCard()
+    table.insert(inv, newCard)
+    self:SaveInventory(ply)
+    return true
+end

@@ -1,0 +1,19 @@
+-- Define a zone
+local rarityZone = {
+    pos = Vector(1000, 1000, 128),
+    radius = 200,
+    requiredRarity = "Legendary"
+}
+
+hook.Add("Think", "CROWS_TCG_ZoneLockCheck", function()
+    for _, ply in ipairs(player.GetAll()) do
+        local dist = ply:GetPos():Distance(rarityZone.pos)
+        if dist < rarityZone.radius then
+            local rarity = ply.EquippedCard and ply.EquippedCard.rarity
+            if rarity ~= rarityZone.requiredRarity then
+                ply:ChatPrint("[Goblin Gate] Only those with " .. rarityZone.requiredRarity .. " cards may enter!")
+                ply:SetPos(rarityZone.pos + Vector(300, 0, 0))
+            end
+        end
+    end
+end)

@@ -1,0 +1,21 @@
+include("crows_pack/sv_inventory.lua")
+include("crows_pack/sv_effects.lua")
+include("crows_pack/sv_admin_logic.lua")
+include("crows_pack/sv_marketplace.lua")
+
+util.AddNetworkString("CrowsPack_OpenAdminPanel")
+
+hook.Add("PlayerSay", "CrowsPack_AdminChatCommand", function(ply, text)
+    if string.lower(text) == "!cardadmin" and ply:IsSuperAdmin() then
+        net.Start("CrowsPack_OpenAdminPanel")
+        net.Send(ply)
+        return ""
+    end
+end)
+
+if not file.Exists("crows_pack/pack_settings.json", "DATA") then
+    file.CreateDir("crows_pack")
+    file.Write("crows_pack/pack_settings.json", "{}")
+end
+
+CROWS_PACK.Packs = util.JSONToTable(file.Read("crows_pack/pack_settings.json", "DATA") or "{}")

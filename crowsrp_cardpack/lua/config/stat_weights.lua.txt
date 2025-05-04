@@ -1,0 +1,46 @@
+-- lua/crows_cards/config/stat_weights.lua
+
+CROWS_STAT_WEIGHTS = {
+    [CROWS_RARITY.UNCOMMON] = {
+        durability = {50, 100},
+        damage = {2, 5},
+        accuracy = {1, 10},
+        firerate = {0, 2},
+        weight = {1, 3}
+    },
+    [CROWS_RARITY.RARE] = {
+        durability = {100, 200},
+        damage = {6, 10},
+        accuracy = {11, 20},
+        firerate = {2, 4},
+        weight = {2, 5}
+    },
+    [CROWS_RARITY.EPIC] = {
+        durability = {200, 300},
+        damage = {11, 20},
+        accuracy = {21, 35},
+        firerate = {4, 6},
+        weight = {3, 6}
+    },
+    [CROWS_RARITY.LEGENDARY] = {
+        durability = {300, 400},
+        damage = {21, 30},
+        accuracy = {36, 50},
+        firerate = {6, 8},
+        weight = {4, 7}
+    },
+    [CROWS_RARITY.MYTHICAL] = {
+        durability = {400, 475},
+        damage = {31, 45},
+        accuracy = {51, 70},
+        firerate = {8, 10},
+        weight = {5, 8}
+    },
+    [CROWS_RARITY.ANCIENT] = {
+        durability = {475, 500},
+        damage = {46, 60},
+        accuracy = {71, 100},
+        firerate = {10, 12},
+        weight = {6, 10}
+    }
+}

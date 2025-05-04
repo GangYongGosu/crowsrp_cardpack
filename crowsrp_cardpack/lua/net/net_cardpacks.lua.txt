@@ -1,0 +1,27 @@
+util.AddNetworkString("CrowsPack_AdminOpenEditor")
+util.AddNetworkString("CrowsPack_SaveConfig")
+util.AddNetworkString("CrowsPack_RequestConfig")
+util.AddNetworkString("CrowsPack_SendConfig")
+
+-- Client requests config
+net.Receive("CrowsPack_RequestConfig", function(len, ply)
+    if not CrowsPack.Config.AdminRanks[ply:GetUserGroup()] then return end
+
+    net.Start("CrowsPack_SendConfig")
+        net.WriteTable(CrowsPack.Config.MaxDistribution)
+    net.Send(ply)
+end)
+
+-- Admin saves config from editor
+net.Receive("CrowsPack_SaveConfig", function(len, ply)
+    if not CrowsPack.Config.AdminRanks[ply:GetUserGroup()] then return end
+
+    local newConfig = net.ReadTable()
+
+    if istable(newConfig) then
+        CrowsPack.Config.MaxDistribution = newConfig
+
+        file.Write("crowsrp_config/packs.json", util.TableToJSON(newConfig, true))
+        print("[CrowsRP] Card pack config saved by " .. ply:Nick())
+    end
+end)

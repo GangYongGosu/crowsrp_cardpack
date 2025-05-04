@@ -1,0 +1,45 @@
+-- lua/crows_cards/sv_equip_logic.lua
+
+util.AddNetworkString("CrowsTCG:ToggleEquip")
+
+function CrowsTCG:GetMaxEquipWeight(ply)
+    local rank = ply.CrowsGoblinRank or "Bronze Goblin"
+    local limits = {
+        ["Bronze Goblin"] = 10,
+        ["Silver Goblin"] = 15,
+        ["Gold Goblin"] = 20,
+        ["Emerald Goblin"] = 25,
+        ["Diamond Goblin"] = 30
+    }
+
+    return limits[rank] or 10
+end
+
+function CrowsTCG:GetCurrentEquipWeight(ply)
+    local total = 0
+    for _, card in ipairs(ply.CrowsInventory or {}) do
+        if card.equipped then
+            total = total + (card.weight or 0)
+        end
+    end
+    return total
+end
+
+net.Receive("CrowsTCG:ToggleEquip", function(len, ply)
+    local card = net.ReadTable()
+    for _, ownedCard in ipairs(ply.CrowsInventory or {}) do
+        if ownedCard.id == card.id then
+            if not ownedCard.equipped then
+                if CrowsTCG:GetCurrentEquipWeight(ply) + (ownedCard.weight or 0) > CrowsTCG:GetMaxEquipWeight(ply) then
+                    ply:ChatPrint("[CrowsTCG] Equip failed: Overweight limit for your Goblin rank.")
+                    return
+                end
+                ownedCard.equipped = true
+                ply:ChatPrint("[CrowsTCG] Card equipped.")
+            else
+                ownedCard.equipped = false
+                ply:ChatPrint("[CrowsTCG] Card unequipped.")
+            end
+        end
+    end
+end)

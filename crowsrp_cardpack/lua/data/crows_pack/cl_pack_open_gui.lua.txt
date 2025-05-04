@@ -1,0 +1,74 @@
+-- lua/crows_cards/cl_pack_open_gui.lua
+
+local OpenedCards = {}
+local RevealStage = 1
+local RevealDelay = 0.25
+local LastReveal = 0
+local isOpen = false
+
+surface.CreateFont("CrowsTCG_Title", {
+    font = "DermaLarge",
+    size = 32,
+    weight = 800,
+    antialias = true
+})
+
+net.Receive("CROWS_TCG_OpenPackUI", function()
+    OpenedCards = net.ReadTable()
+    RevealStage = 1
+    LastReveal = CurTime()
+    isOpen = true
+
+    surface.PlaySound("buttons/button14.wav")
+
+    if not IsValid(CROWS_TCG_Frame) then
+        CROWS_TCG_Frame = vgui.Create("DFrame")
+        CROWS_TCG_Frame:SetSize(1100, 600)
+        CROWS_TCG_Frame:Center()
+        CROWS_TCG_Frame:MakePopup()
+        CROWS_TCG_Frame:SetTitle("")
+        CROWS_TCG_Frame:ShowCloseButton(false)
+        CROWS_TCG_Frame.Paint = function(self, w, h)
+            draw.RoundedBox(8, 0, 0, w, h, Color(10, 10, 20, 230))
+            draw.SimpleText("Crows RP – Pack Unboxing", "CrowsTCG_Title", w / 2, 25, Color(255, 255, 255), TEXT_ALIGN_CENTER)
+        end
+
+        CROWS_TCG_Frame.CloseButton = vgui.Create("DButton", CROWS_TCG_Frame)
+        CROWS_TCG_Frame.CloseButton:SetSize(120, 35)
+        CROWS_TCG_Frame.CloseButton:SetPos(CROWS_TCG_Frame:GetWide() - 140, CROWS_TCG_Frame:GetTall() - 50)
+        CROWS_TCG_Frame.CloseButton:SetText("Close")
+        CROWS_TCG_Frame.CloseButton.DoClick = function()
+            surface.PlaySound("buttons/button9.wav")
+            CROWS_TCG_Frame:Close()
+            isOpen = false
+        end
+    end
+end)
+
+hook.Add("HUDPaint", "CROWS_TCG_PackRenderer", function()
+    if not isOpen or not IsValid(CROWS_TCG_Frame) then return end
+
+    local xStart, yStart = ScrW() / 2 - 500, ScrH() / 2 - 180
+    local w, h = 180, 260
+    local gap = 20
+
+    if CurTime() >= LastReveal + RevealDelay and RevealStage <= #OpenedCards then
+        surface.PlaySound("crows/cards/reveal.wav")
+        RevealStage = RevealStage + 1
+        LastReveal = CurTime()
+    end
+
+    for i = 1, RevealStage - 1 do
+        local card = OpenedCards[i]
+        if card then
+            local x = xStart + ((i - 1) % 5) * (w + gap)
+            local y = yStart + math.floor((i - 1) / 5) * (h + gap)
+            CROWS_TCG_RenderCard(card, x, y, w, h, true)
+        end
+    end
+end)
+
+-- serverside trigger example:
+net.Start("CROWS_TCG_OpenPackUI")
+net.WriteTable(cardsToSend)
+net.Send(player)

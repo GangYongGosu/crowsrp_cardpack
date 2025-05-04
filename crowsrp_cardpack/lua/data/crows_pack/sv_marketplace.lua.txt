@@ -1,0 +1,106 @@
+util.AddNetworkString("CrowsPack_OpenMarketplace")
+util.AddNetworkString("CrowsPack_ListCard")
+util.AddNetworkString("CrowsPack_BuyCard")
+util.AddNetworkString("CrowsPack_SendMarketplace")
+
+local listings = {}
+
+-- Persist listings
+local function SaveListings()
+    if not file.IsDir("crows_pack/marketplace_data", "DATA") then
+        file.CreateDir("crows_pack/marketplace_data")
+    end
+    file.Write("crows_pack/marketplace_data/listings.txt", util.TableToJSON(listings, true))
+end
+
+local function LoadListings()
+    if file.Exists("crows_pack/marketplace_data/listings.txt", "DATA") then
+        listings = util.JSONToTable(file.Read("crows_pack/marketplace_data/listings.txt", "DATA")) or {}
+    end
+end
+LoadListings()
+
+-- Listing a card
+net.Receive("CrowsPack_ListCard", function(len, ply)
+    local card = net.ReadTable()
+    local price = net.ReadInt(32)
+
+    if not card or not card.uid then return end
+    table.insert(listings, {
+        seller = ply:SteamID64(),
+        card = card,
+        price = price,
+        name = ply:Nick()
+    })
+
+    SaveListings()
+end)
+
+-- Buying a card
+net.Receive("CrowsPack_BuyCard", function(len, ply)
+    local index = net.ReadInt(16)
+    local item = listings[index]
+    if not item then return end
+
+    if ply:getDarkRPVar("money") >= item.price then
+        ply:addMoney(-item.price)
+        local seller = player.GetBySteamID64(item.seller)
+        if IsValid(seller) then seller:addMoney(item.price) end
+
+        ply.OwnedCards = ply.OwnedCards or {}
+        table.insert(ply.OwnedCards, item.card)
+
+        table.remove(listings, index)
+        SaveListings()
+    end
+end)
+
+-- Player requests market
+net.Receive("CrowsPack_OpenMarketplace", function(_, ply)
+    net.Start("CrowsPack_SendMarketplace")
+    net.WriteTable(listings)
+    net.Send(ply)
+end)
+
+
+util.AddNetworkString("CROWS_TCG_SellCard")
+util.AddNetworkString("CROWS_TCG_BuyPack")
+
+net.Receive("CROWS_TCG_SellCard", function(len, ply)
+    local uid = net.ReadString()
+    local inv = CROWS_TCG_GetInventory(ply)
+
+    for i, card in ipairs(inv) do
+        if card.uid == uid then
+            local rarity = card.rarity or "common"
+            local payout = ({
+                ["common"] = 5,
+                ["uncommon"] = 10,
+                ["rare"] = 20,
+                ["epic"] = 40,
+                ["legendary"] = 100,
+                ["mythical"] = 2500,
+                ["ancient"] = 5000
+            })[rarity] or 5
+
+            table.remove(inv, i)
+            CROWS_TCG_AddTokens(ply, payout)
+
+            ply:ChatPrint("[Goblin] Sold " .. card.name .. " for " .. payout .. " tokens.")
+            return
+        end
+    end
+
+    ply:ChatPrint("[Goblin] I can't find that card...")
+end)
+
+net.Receive("CROWS_TCG_BuyPack", function(_, ply)
+    if ply:GetNWInt("GoblinTokens", 0) < 50 then
+        ply:ChatPrint("[Goblin] Not enough tokens, cheapskate!")
+        return
+    end
+
+    CROWS_TCG_RemoveTokens(ply, 50)
+    CROWS_TCG_GiveRandomPack(ply, "epic") -- or "random" pack logic
+    ply:ChatPrint("[Goblin] Here's your fancy new pack!")
+end)

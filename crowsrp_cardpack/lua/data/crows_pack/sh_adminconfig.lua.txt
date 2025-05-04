@@ -1,0 +1,8 @@
+CrowsPack.Config = CrowsPack.Config or {}
+
+-- Only these ULX groups can see the admin config tab
+CrowsPack.Config.AdminRanks = {
+    ["Super Admin"] = true,
+    ["Admin"] = true,
+    ["owner"] = true
+}

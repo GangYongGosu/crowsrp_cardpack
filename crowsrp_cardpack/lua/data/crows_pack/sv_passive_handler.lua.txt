@@ -1,0 +1,42 @@
+-- lua/crows_cards/sv_passive_handler.lua
+
+timer.Create("CrowsTCG_PassiveEffectLoop", 5, 0, function()
+    for _, ply in ipairs(player.GetAll()) do
+        for _, card in ipairs(ply.CrowsInventory or {}) do
+            if card.equipped and card.passive then
+                if card.passive == "Fire Aura" then
+                    local radius = 150
+                    for _, ent in ipairs(ents.FindInSphere(ply:GetPos(), radius)) do
+                        if ent:IsPlayer() and ent ~= ply then
+                            local dmg = DamageInfo()
+                            dmg:SetDamage(5)
+                            dmg:SetAttacker(ply)
+                            dmg:SetDamageType(DMG_BURN)
+                            ent:TakeDamageInfo(dmg)
+                        end
+                    end
+                elseif card.passive == "Bleed" then
+                    -- Applied in damage hook instead
+                    hook.Add("EntityTakeDamage", "CrowsTCG_BleedEffect", function(victim, dmginfo)
+                        local attacker = dmginfo:GetAttacker()
+                        if attacker == ply and math.random(1, 100) <= 15 then
+                            timer.Create("Bleed_" .. victim:EntIndex(), 1, 5, function()
+                                if IsValid(victim) then
+                                    local dmg = DamageInfo()
+                                    dmg:SetDamage(2)
+                                    dmg:SetDamageType(DMG_SLASH)
+                                    dmg:SetAttacker(ply)
+                                    victim:TakeDamageInfo(dmg)
+                                end
+                            end)
+                        end
+                    end)
+                elseif card.passive == "Regenerate" then
+                    if ply:Health() < ply:GetMaxHealth() then
+                        ply:SetHealth(math.min(ply:GetMaxHealth(), ply:Health() + 5))
+                    end
+                end
+            end
+        end
+    end
+end)

@@ -1,0 +1,22 @@
+-- lua/crows_cards/sv_tradeup.lua
+
+function CrowsTCG:TradeUp(player, rarity)
+    if not player.Cards then return end
+
+    local count = 0
+    for _, card in ipairs(player.Cards) do
+        if card.rarity == rarity then
+            count = count + 1
+        end
+    end
+
+    if count >= 10 then
+        -- Remove 10 and add 1 of next rarity
+        self:RemoveCards(player, rarity, 10)
+        local upgraded = self:GenerateCard(rarity + 1)
+        table.insert(player.Cards, upgraded)
+        player:ChatPrint("[CrowsTCG] Trade-up successful! You earned a " .. CROWS_RARITY_NAMES[rarity + 1] .. " card.")
+    else
+        player:ChatPrint("[CrowsTCG] You need 10 cards of that rarity to trade up.")
+    end
+end

@@ -1,0 +1,59 @@
+util.AddNetworkString("CrowsPack_SendInventory")
+
+CrowsPack.PlayerInventories = {}
+
+local function GetPlayerFile(ply)
+    return "crows_pack/inv_" .. ply:SteamID64() .. ".json"
+end
+
+function CrowsPack:SaveInventory(ply)
+    if not IsValid(ply) then return end
+    local data = CrowsPack.PlayerInventories[ply] or {}
+    file.CreateDir("crows_pack")
+    file.Write(GetPlayerFile(ply), util.TableToJSON(data, true))
+end
+
+function CrowsPack:LoadInventory(ply)
+    local filePath = GetPlayerFile(ply)
+    if file.Exists(filePath, "DATA") then
+        local json = file.Read(filePath, "DATA")
+        local data = util.JSONToTable(json) or {}
+        CrowsPack.PlayerInventories[ply] = data
+    else
+        CrowsPack.PlayerInventories[ply] = {}
+    end
+end
+
+hook.Add("PlayerInitialSpawn", "CrowsPack_LoadInv", function(ply)
+    CrowsPack:LoadInventory(ply)
+
+    -- Send to client
+    timer.Simple(2, function()
+        net.Start("CrowsPack_SendInventory")
+        net.WriteTable(CrowsPack.PlayerInventories[ply] or {})
+        net.Send(ply)
+    end)
+end)
+
+hook.Add("PlayerDisconnected", "CrowsPack_SaveInv", function(ply)
+    CrowsPack:SaveInventory(ply)
+end)
+
+
+-- lua/crows_cards/sv_inventory.lua
+
+util.AddNetworkString("CROWS_TCG_RequestInventory")
+util.AddNetworkString("CROWS_TCG_SendInventory")
+util.AddNetworkString("CROWS_TCG_ToggleEquip")
+
+net.Receive("CROWS_TCG_RequestInventory", function(len, ply)
+    local cards = CROWS_TCG_GetInventory(ply) or {}
+    net.Start("CROWS_TCG_SendInventory")
+    net.WriteTable(cards)
+    net.Send(ply)
+end)
+
+net.Receive("CROWS_TCG_ToggleEquip", function(len, ply)
+    local uid = net.ReadString()
+    CROWS_TCG_ToggleCardEquip(ply, uid)
+end)

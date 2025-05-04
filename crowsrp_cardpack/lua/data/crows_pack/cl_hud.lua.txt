@@ -1,0 +1,14 @@
+hook.Add("HUDPaint", "CrowsPack_DrawEquippedHUD", function()
+    local card = LocalPlayer().EquippedCard
+    if not card then return end
+
+    draw.RoundedBox(6, 10, ScrH() - 140, 280, 120, Color(20, 20, 40, 220))
+    draw.SimpleText("Equipped Card:", "Trebuchet24", 20, ScrH() - 130, color_white)
+    draw.SimpleText(card.name .. " [" .. card.rarity .. "]", "Trebuchet18", 20, ScrH() - 100, color_white)
+    draw.SimpleText("Durability: " .. card.durability, "DermaDefault", 20, ScrH() - 70, color_white)
+    draw.SimpleText("Armor: " .. card.armor .. " | DMG+: " .. card.damageBoost, "DermaDefault", 20, ScrH() - 50, color_white)
+end)
+
+net.Receive("CrowsPack_UpdateEquipped", function()
+    LocalPlayer().EquippedCard = net.ReadTable()
+end)

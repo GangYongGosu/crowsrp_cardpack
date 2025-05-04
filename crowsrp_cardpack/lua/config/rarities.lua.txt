@@ -1,0 +1,30 @@
+-- lua/crows_cards/config/rarities.lua
+
+CROWS_PACKS = {
+    ["Epic Pack"] = {
+        max_cards = 10,
+        max_distribution = {
+            UNCOMMON = 6,
+            RARE = 2,
+            EPIC = 1
+        }
+    },
+    ["Mythical Pack"] = {
+        max_cards = 10,
+        max_distribution = {
+            UNCOMMON = 7,
+            EPIC = 1,
+            MYTHICAL = 1
+        }
+    },
+    ["Ancient Pack"] = {
+        max_cards = 10,
+        max_distribution = {
+            UNCOMMON = 5,
+            RARE = 2,
+            EPIC = 2,
+            LEGENDARY = 1,
+            ANCIENT = 1
+        }
+    }
+}

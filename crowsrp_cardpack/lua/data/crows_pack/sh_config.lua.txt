@@ -1,0 +1,8 @@
+CROWS_CONFIG = {}
+
+CROWS_CONFIG.AdminRanks = {
+    ["Super Admin"] = true,
+    ["Owner"] = true,
+    ["Admin"] = true,
+    ["Developer"] = true,
+}

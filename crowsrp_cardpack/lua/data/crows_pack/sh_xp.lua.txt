@@ -1,0 +1,22 @@
+util.AddNetworkString("CROWS_TCG_XP_Update")
+util.AddNetworkString("CROWS_TCG_RequestXP")
+
+-- Called when player spawns
+hook.Add("PlayerInitialSpawn", "CROWS_TCG_InitXP", function(ply)
+    ply:SetNWInt("CROWS_XP", 0)
+    ply:SetNWInt("CROWS_Level", 1)
+end)
+
+-- XP Required per Level
+local function XPForLevel(lvl)
+    return math.floor(100 + (lvl ^ 1.5) * 50)
+end
+
+function CROWS_TCG_AddXP(ply, amt)
+    local xp = ply:GetNWInt("CROWS_XP", 0)
+    local level = ply:GetNWInt("CROWS_Level", 1)
+    local newXP = xp + amt
+
+    local required = XPForLevel(level)
+
+    while newXP

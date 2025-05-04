@@ -1,0 +1,60 @@
+-- lua/crows_cards/cl_passive_fx.lua
+
+local auraEmitters = {}
+
+hook.Add("PostPlayerDraw", "CrowsTCG_FX_AuraPassive", function(ply)
+    if not IsValid(ply) or not ply.CrowsInventory then return end
+    if not LocalPlayer():GetPos():DistToSqr(ply:GetPos()) < 250000 then return end
+
+    for _, card in ipairs(ply.CrowsInventory) do
+        if card.equipped and card.passive == "Fire Aura" then
+            if not auraEmitters[ply] then
+                auraEmitters[ply] = ParticleEmitter(ply:GetPos())
+            end
+
+            local emitter = auraEmitters[ply]
+            local part = emitter:Add("particles/fire_glow", ply:GetPos() + Vector(0,0,40) + VectorRand() * 10)
+            if part then
+                part:SetDieTime(0.6)
+                part:SetStartAlpha(180)
+                part:SetEndAlpha(0)
+                part:SetStartSize(6)
+                part:SetEndSize(2)
+                part:SetColor(255, 100, 0)
+                part:SetVelocity(VectorRand() * 5)
+            end
+        end
+    end
+end)
+
+hook.Add("EntityRemoved", "CrowsTCG_CleanupEmitters", function(ent)
+    if auraEmitters[ent] then
+        auraEmitters[ent]:Finish()
+        auraEmitters[ent] = nil
+    end
+end)
+
+hook.Add("PostDrawTranslucentRenderables", "CROWS_TCG_PassiveFX", function()
+    for _, ply in ipairs(player.GetAll()) do
+        local card = ply.EquippedCard
+        if not card then continue end
+
+        if card.passive == "fire" then
+            local emitter = ParticleEmitter(ply:GetPos())
+            local part = emitter:Add("particles/flamelet" .. math.random(1, 5), ply:GetPos() + Vector(0,0,60))
+            if part then
+                part:SetVelocity(VectorRand() * 5)
+                part:SetDieTime(0.5)
+                part:SetStartAlpha(100)
+                part:SetStartSize(8)
+                part:SetEndSize(0)
+                part:SetColor(255, 100, 0)
+            end
+        elseif card.passive == "heal" then
+            local d = math.sin(CurTime() * 3)
+            local col = Color(100, 255, 100, 100 + d * 50)
+            render.SetColorMaterial()
+            render.DrawSphere(ply:GetPos() + Vector(0,0,48), 10, 8, 8, col)
+        end
+    end
+end)

@@ -1,0 +1,52 @@
+-- lua/crows_cards/cl_card_renderer.lua
+
+surface.CreateFont("CrowsTCG_CardName", {
+    font = "Trebuchet24",
+    size = 22,
+    weight = 700,
+    antialias = true
+})
+
+surface.CreateFont("CrowsTCG_CardStat", {
+    font = "Roboto",
+    size = 18,
+    weight = 500,
+    antialias = true
+})
+
+local rarityColors = {
+    ["Common"]    = Color(180, 180, 180),
+    ["Uncommon"]  = Color(50, 200, 50),
+    ["Rare"]      = Color(0, 100, 255),
+    ["Epic"]      = Color(190, 70, 255),
+    ["Legendary"] = Color(255, 200, 0),
+    ["Mythical"]  = Color(200, 0, 255),
+    ["Ancient"]   = Color(255, 0, 0)
+}
+
+function CROWS_TCG_RenderCard(card, x, y, w, h, flip)
+    if not card then return end
+
+    -- Card background
+    draw.RoundedBox(8, x, y, w, h, Color(15, 15, 15, 240))
+
+    -- Rarity glow
+    local glow = rarityColors[card.rarity or "Common"] or Color(255, 255, 255)
+    surface.SetDrawColor(glow.r, glow.g, glow.b, 100)
+    surface.DrawRect(x + 2, y + 2, w - 4, h - 4)
+
+    -- Card content (front)
+    if flip then
+        draw.SimpleText(card.name or "Unknown Card", "CrowsTCG_CardName", x + w/2, y + 10, color_white, TEXT_ALIGN_CENTER)
+
+        local stats = {
+            "Rank: " .. (card.rank or "F"),
+            "Durability: " .. (card.durability or "?"),
+            "Armor: " .. (card.armor or "0"),
+            "Damage Boost: " .. (card.base_damage or "0"),
+            "Fire Rate: " .. (card.fire_rate or "0"),
+            "Accuracy: " .. (card.ac
+
+
+-- In cl_card_renderer.lua or inventory
+CROWS_TCG_DrawCardAura(x, y, w, h, card.rarity)
