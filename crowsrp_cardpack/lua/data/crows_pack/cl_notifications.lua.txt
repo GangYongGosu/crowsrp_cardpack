@@ -1,7 +1,0 @@
--- Placeholder for visual popup / notification logic
--- You can expand this to handle rarity glow notices etc.
-
-function CrowsPack.Notify(text, duration)
-    notification.AddLegacy("[CrowsPack] " .. text, NOTIFY_GENERIC, duration or 5)
-    surface.PlaySound("buttons/button15.wav")
-end

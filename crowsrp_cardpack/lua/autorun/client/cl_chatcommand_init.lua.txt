@@ -1,7 +1,0 @@
-hook.Add("OnPlayerChat", "CrowsRP_OpenUnboxGUI", function(ply, text)
-    if ply == LocalPlayer() and string.lower(text) == "!unboxcards" then
-        net.Start("CrowsRP_OpenUnboxGUI")
-        net.SendToServer()
-        return true
-    end
-end)

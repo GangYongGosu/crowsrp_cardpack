@@ -1,5 +1,0 @@
-ENT.Base = "base_gmodentity"
-ENT.Type = "anim"
-ENT.PrintName = "Goblin Card Crate"
-ENT.Author = "CrowsRP"
-ENT.Spawnable = true

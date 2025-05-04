@@ -1,5 +1,0 @@
-function CrowsRP.AnimatePackOpening(packData)
-    -- Show rune glow
-    -- Delay -> flip cards -> reveal stats + model
-    -- Trigger glow sounds, card tier effects
-end

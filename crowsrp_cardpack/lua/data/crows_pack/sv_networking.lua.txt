@@ -1,2 +1,0 @@
--- Add more networking strings for future phases here
-util.AddNetworkString("CrowsPack_OpenUnboxUI")

@@ -1,3 +1,0 @@
-hook.Add("InitPostEntity", "CrowsPack_Startup", function()
-    chat.AddText(Color(200, 100, 255), "[CrowsPack]", color_white, " Card Pack System Initialized.")
-end)
